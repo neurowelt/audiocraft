@@ -13,6 +13,7 @@ from dataclasses import dataclass
 from pathlib import Path
 import logging
 import typing as tp
+from io import BytesIO
 
 import numpy as np
 import soundfile
@@ -150,18 +151,19 @@ def audio_read(filepath: tp.Union[str, Path], seek_time: float = 0.,
     return wav, sr
 
 
-def audio_write(stem_name: tp.Union[str, Path],
+def audio_write(stem_name: tp.Union[str, Path, BytesIO],
                 wav: torch.Tensor, sample_rate: int,
                 format: str = 'wav', mp3_rate: int = 320, normalize: bool = True,
                 strategy: str = 'peak', peak_clip_headroom_db: float = 1,
                 rms_headroom_db: float = 18, loudness_headroom_db: float = 14,
                 loudness_compressor: bool = False,
                 log_clipping: bool = True, make_parent_dir: bool = True,
-                add_suffix: bool = True) -> Path:
+                add_suffix: bool = True) -> tp.Union[Path, BytesIO]:
     """Convenience function for saving audio to disk. Returns the filename the audio was written to.
 
     Args:
-        stem_name (str or Path): Filename without extension which will be added automatically.
+        stem_name (str or Path): Filename without extension which will be added automatically or
+            buffer to write the audio to.
         format (str): Either "wav" or "mp3".
         mp3_rate (int): kbps when using mp3s.
         normalize (bool): if `True` (default), normalizes according to the prescribed
@@ -179,7 +181,7 @@ def audio_write(stem_name: tp.Union[str, Path],
             occurs despite strategy (only for 'rms').
         make_parent_dir (bool): Make parent directory if it doesn't exist.
     Returns:
-        Path: Path of the saved audio.
+        audio: Path of the saved audio or buffer with written audio.
     """
     assert wav.dtype.is_floating_point, "wav is not floating point"
     if wav.dim() == 1:
@@ -200,16 +202,25 @@ def audio_write(stem_name: tp.Union[str, Path],
         kwargs.update({"encoding": "PCM_S", "bits_per_sample": 16})
     else:
         raise RuntimeError(f"Invalid format {format}. Only wav or mp3 are supported.")
-    if not add_suffix:
-        suffix = ''
-    path = Path(str(stem_name) + suffix)
-    if make_parent_dir:
-        path.parent.mkdir(exist_ok=True, parents=True)
+    
+    if isinstance(stem_name, str):
+        if not add_suffix:
+            suffix = ''
+        audio = Path(str(stem_name) + suffix)
+        if make_parent_dir:
+            audio.parent.mkdir(exist_ok=True, parents=True)
+    
     try:
-        ta.save(path, wav, sample_rate, **kwargs)
+        ta.save(
+            filepath=audio,
+            src=wav,
+            sample_rate=sample_rate, 
+            format=format,
+            **kwargs
+        )
     except Exception:
-        if path.exists():
+        if isinstance(audio, str) and audio.exists():
             # we do not want to leave half written files around.
-            path.unlink()
+            audio.unlink()
         raise
-    return path
+    return audio
