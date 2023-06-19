@@ -183,11 +183,17 @@ def audio_write(stem_name: tp.Union[str, Path, BytesIO],
     Returns:
         audio: Path of the saved audio or buffer with written audio.
     """
+
+    # Prepare tensor
     assert wav.dtype.is_floating_point, "wav is not floating point"
+    wav = wav.detach().cpu()
     if wav.dim() == 1:
         wav = wav[None]
     elif wav.dim() > 2:
-        raise ValueError("Input wav should be at most 2 dimension.")
+        wav = wav.squeeze(0)
+    if wav.dim() > 2:
+        raise ValueError("Input wav should be at most 2 dimension. \
+                         Make sure you pass one track at a time.")
     assert wav.isfinite().all()
     wav = normalize_audio(wav, normalize, strategy, peak_clip_headroom_db,
                           rms_headroom_db, loudness_headroom_db, log_clipping=log_clipping,
@@ -203,6 +209,7 @@ def audio_write(stem_name: tp.Union[str, Path, BytesIO],
     else:
         raise RuntimeError(f"Invalid format {format}. Only wav or mp3 are supported.")
     
+    audio = stem_name
     if isinstance(stem_name, str):
         if not add_suffix:
             suffix = ''

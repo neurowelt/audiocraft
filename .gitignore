@@ -53,3 +53,6 @@ ENV/
 /notebooks
 /local_scripts
 /notes
+
+# test tracks
+*.wav
