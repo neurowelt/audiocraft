@@ -143,3 +143,15 @@ List of changes made in this fork:
   with open("output.wav", "wb") as f:
       f.write(buffer.read())
   ```
+
+* Set `max_duration` when loading model from `get_pretrained`:
+
+    ```python
+    model = MusicGen.get_pretrained('melody', max_duration=10)
+    ```
+
+* Load model from specified directory:
+
+    ```python
+    model = MusicGen.from_pretrained("melody", model_dir='path/to/model')
+    ```
