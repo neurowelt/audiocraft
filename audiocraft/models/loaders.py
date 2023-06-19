@@ -50,6 +50,11 @@ def _get_state_dict(
 
     if os.path.isfile(file_or_url_or_id):
         return torch.load(file_or_url_or_id, map_location=device)
+    
+    if (os.path.isdir(file_or_url_or_id) and
+        os.path.isfile(os.path.join(file_or_url_or_id, filename))):
+        print(f"Loading from directory: {file_or_url_or_id}")
+        return torch.load(os.path.join(file_or_url_or_id, filename), map_location=device)
 
     elif file_or_url_or_id.startswith('https://'):
         return torch.hub.load_state_dict_from_url(file_or_url_or_id, map_location=device, check_hash=True)

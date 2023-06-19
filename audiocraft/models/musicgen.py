@@ -68,7 +68,8 @@ class MusicGen:
         return self.compression_model.channels
 
     @staticmethod
-    def get_pretrained(name: str = 'melody', device=None):
+    def get_pretrained(name: str = 'melody', device: tp.Optional[str] = None, 
+                       model_dir: tp.Optional[str] = None, **kwargs):
         """Return pretrained model, we provide four models:
         - small (300M), text to music, # see: https://huggingface.co/facebook/musicgen-small
         - medium (1.5B), text to music, # see: https://huggingface.co/facebook/musicgen-medium
@@ -86,13 +87,16 @@ class MusicGen:
             # used only for unit tests
             compression_model = get_debug_compression_model(device)
             lm = get_debug_lm_model(device)
-            return MusicGen(name, compression_model, lm)
+            return MusicGen(name, compression_model, lm, **kwargs)
 
         if name not in HF_MODEL_CHECKPOINTS_MAP:
             raise ValueError(
                 f"{name} is not a valid checkpoint name. "
                 f"Choose one of {', '.join(HF_MODEL_CHECKPOINTS_MAP.keys())}"
             )
+        
+        if model_dir and os.path.isdir(model_dir):
+            name = model_dir
 
         cache_dir = os.environ.get('MUSICGEN_ROOT', None)
         compression_model = load_compression_model(name, device=device, cache_dir=cache_dir)
@@ -100,7 +104,7 @@ class MusicGen:
         if name == 'melody':
             lm.condition_provider.conditioners['self_wav'].match_len_on_eval = True
 
-        return MusicGen(name, compression_model, lm)
+        return MusicGen(name, compression_model, lm, **kwargs)
 
     def set_generation_params(self, use_sampling: bool = True, top_k: int = 250,
                               top_p: float = 0.0, temperature: float = 1.0,
