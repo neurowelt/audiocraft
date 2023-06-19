@@ -5,6 +5,10 @@
 
 Audiocraft is a PyTorch library for deep learning research on audio generation. At the moment, it contains the code for MusicGen, a state-of-the-art controllable text-to-music model.
 
+## About the fork
+
+The goal of this fork is to introduce some small changes to the original code that I found useful. You can find the list of changes below, in the [Chanelog](#changelog) section.
+
 ## MusicGen
 
 Audiocraft provides the code and models for MusicGen, [a simple and controllable model for music generation][arxiv]. MusicGen is a single stage auto-regressive
@@ -122,3 +126,20 @@ Check [@camenduru tutorial on Youtube](https://www.youtube.com/watch?v=EGfxuTy9E
 
 [arxiv]: https://arxiv.org/abs/2306.05284
 [musicgen_samples]: https://ai.honu.io/papers/musicgen/
+
+## Changelog
+
+List of changes made in this fork:
+
+* Allow writing to buffer using `audio_write`:
+
+  ```python
+  from audiocraft.data.audio import audio_write
+  from io import BytesIO
+
+  buffer = BytesIO()
+  audio_write(buffer, wav, sample_rate)
+
+  with open("output.wav", "wb") as f:
+      f.write(buffer.read())
+  ```
