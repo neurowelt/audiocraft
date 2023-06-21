@@ -246,7 +246,7 @@ class MusicGen:
                     torch.tensor([0], device=self.device),
                     path='null_wav')  # type: ignore
         else:
-            if self.name != "melody":
+            if self.name.split("/")[-1] != "melody":
                 raise RuntimeError("This model doesn't support melody conditioning. "
                                    "Use the `melody` model.")
             assert len(melody_wavs) == len(descriptions), \
