@@ -95,12 +95,13 @@ class MusicGen:
                 f"Choose one of {', '.join(HF_MODEL_CHECKPOINTS_MAP.keys())}"
             )
         
+        model_location = name
         if model_dir and os.path.isdir(model_dir):
-            name = model_dir
+            model_location = model_dir
 
         cache_dir = os.environ.get('MUSICGEN_ROOT', None)
-        compression_model = load_compression_model(name, device=device, cache_dir=cache_dir)
-        lm = load_lm_model(name, device=device, cache_dir=cache_dir)
+        compression_model = load_compression_model(model_location, device=device, cache_dir=cache_dir)
+        lm = load_lm_model(model_location, device=device, cache_dir=cache_dir)
         if name == 'melody':
             lm.condition_provider.conditioners['self_wav'].match_len_on_eval = True
 
@@ -246,7 +247,7 @@ class MusicGen:
                     torch.tensor([0], device=self.device),
                     path='null_wav')  # type: ignore
         else:
-            if self.name.split("/")[-1] != "melody":
+            if self.name != "melody":
                 raise RuntimeError("This model doesn't support melody conditioning. "
                                    "Use the `melody` model.")
             assert len(melody_wavs) == len(descriptions), \
