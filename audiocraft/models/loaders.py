@@ -53,7 +53,6 @@ def _get_state_dict(
     
     if (os.path.isdir(file_or_url_or_id) and
         os.path.isfile(os.path.join(file_or_url_or_id, filename))):
-        print(f"Loading from directory: {file_or_url_or_id}")
         return torch.load(os.path.join(file_or_url_or_id, filename), map_location=device)
 
     elif file_or_url_or_id.startswith('https://'):
@@ -70,19 +69,28 @@ def _get_state_dict(
         raise ValueError(f"{file_or_url_or_id} is not a valid name, path or link that can be loaded.")
 
 
-def load_compression_model(file_or_url_or_id: tp.Union[Path, str], device='cpu', cache_dir: tp.Optional[str] = None):
+def load_compression_model(file_or_url_or_id: tp.Union[Path, str], cfg_path: tp.Optional[str] = None, device: str = 'cpu', cache_dir: tp.Optional[str] = None):
+    print("Start loading compression model")
     pkg = _get_state_dict(file_or_url_or_id, filename="compression_state_dict.bin", cache_dir=cache_dir)
-    cfg = OmegaConf.create(pkg['xp.cfg'])
+    if cfg_path:
+        cfg = OmegaConf.load(cfg_path)
+    else:
+        cfg = OmegaConf.create(pkg['xp.cfg'])
     cfg.device = str(device)
     model = builders.get_compression_model(cfg)
     model.load_state_dict(pkg['best_state'])
     model.eval()
+    print("Finish loading compression model")
     return model
 
 
-def load_lm_model(file_or_url_or_id: tp.Union[Path, str], device='cpu', cache_dir: tp.Optional[str] = None):
+def load_lm_model(file_or_url_or_id: tp.Union[Path, str], cfg_path: tp.Optional[str] = None, device: str = 'cpu', cache_dir: tp.Optional[str] = None):
+    print("Start loading LM model")
     pkg = _get_state_dict(file_or_url_or_id, filename="state_dict.bin", cache_dir=cache_dir)
-    cfg = OmegaConf.create(pkg['xp.cfg'])
+    if cfg_path:
+        cfg = OmegaConf.load(cfg_path)
+    else:
+        cfg = OmegaConf.create(pkg['xp.cfg'])
     cfg.device = str(device)
     if cfg.device == 'cpu':
         cfg.dtype = 'float32'
@@ -92,4 +100,5 @@ def load_lm_model(file_or_url_or_id: tp.Union[Path, str], device='cpu', cache_di
     model.load_state_dict(pkg['best_state'])
     model.eval()
     model.cfg = cfg
+    print("Finish loading LM model")
     return model

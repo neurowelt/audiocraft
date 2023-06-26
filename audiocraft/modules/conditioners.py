@@ -12,6 +12,7 @@ import logging
 import math
 import random
 import re
+import os
 import typing as tp
 import warnings
 
@@ -345,8 +346,11 @@ class T5Conditioner(TextConditioner):
 
     def __init__(self, name: str, output_dim: int, finetune: bool, device: str,
                  autocast_dtype: tp.Optional[str] = 'float32', word_dropout: float = 0.,
-                 normalize_text: bool = False):
-        assert name in self.MODELS, f"unrecognized t5 model name (should in {self.MODELS})"
+                 normalize_text: bool = False, dim: tp.Optional[int] = None):
+        if not os.path.exists(name):
+            assert name in self.MODELS, f"unrecognized t5 model name (should in {self.MODELS})"
+        else:
+            self.MODELS_DIMS[name] = dim
         super().__init__(self.MODELS_DIMS[name], output_dim)
         self.device = device
         self.name = name

@@ -69,7 +69,8 @@ class MusicGen:
 
     @staticmethod
     def get_pretrained(name: str = 'melody', device: tp.Optional[str] = None, 
-                       model_dir: tp.Optional[str] = None, **kwargs):
+                       cfg_path: tp.Optional[str] = None, model_dir: tp.Optional[str] = None,
+                       **kwargs):
         """Return pretrained model, we provide four models:
         - small (300M), text to music, # see: https://huggingface.co/facebook/musicgen-small
         - medium (1.5B), text to music, # see: https://huggingface.co/facebook/musicgen-medium
@@ -101,7 +102,7 @@ class MusicGen:
 
         cache_dir = os.environ.get('MUSICGEN_ROOT', None)
         compression_model = load_compression_model(model_location, device=device, cache_dir=cache_dir)
-        lm = load_lm_model(model_location, device=device, cache_dir=cache_dir)
+        lm = load_lm_model(model_location, cfg_path=cfg_path, device=device, cache_dir=cache_dir)
         if name == 'melody':
             lm.condition_provider.conditioners['self_wav'].match_len_on_eval = True
 
