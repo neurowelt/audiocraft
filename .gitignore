@@ -56,3 +56,10 @@ ENV/
 
 # test tracks
 *.wav
+
+# dev files (fork)
+config*.yaml
+model_cfg*.yaml
+model/*
+models_weights/*
+_demo.ipynb
