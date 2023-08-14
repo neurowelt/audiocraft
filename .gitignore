@@ -70,3 +70,4 @@ model_cfg*.yaml
 model/*
 models_weights/*
 _demo.ipynb
+*.mp4
