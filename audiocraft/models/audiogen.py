@@ -10,6 +10,7 @@ and provide easy access to the generation API.
 """
 
 import typing as tp
+import os
 
 import torch
 
@@ -71,7 +72,8 @@ class AudioGen:
         return self.compression_model.channels
 
     @staticmethod
-    def get_pretrained(name: str = 'facebook/audiogen-medium', device=None):
+    def get_pretrained(name: str = 'facebook/audiogen-medium', device: tp.Optional[str] = None, 
+                       cfg_path: tp.Optional[str] = None, model_dir: tp.Optional[str] = None):
         """Return pretrained model, we provide a single model for now:
         - facebook/audiogen-medium (1.5B), text to sound,
           # see: https://huggingface.co/facebook/audiogen-medium
@@ -87,9 +89,13 @@ class AudioGen:
             compression_model = get_debug_compression_model(device, sample_rate=16000)
             lm = get_debug_lm_model(device)
             return AudioGen(name, compression_model, lm, max_duration=10)
+        
+        model_location = name
+        if model_dir and os.path.isdir(model_dir):
+            model_location = model_dir
 
-        compression_model = load_compression_model(name, device=device)
-        lm = load_lm_model(name, device=device)
+        compression_model = load_compression_model(model_location, device=device)
+        lm = load_lm_model(model_location, cfg_path=cfg_path, device=device)
         assert 'self_wav' not in lm.condition_provider.conditioners, \
             "AudioGen do not support waveform conditioning for now"
         return AudioGen(name, compression_model, lm)
