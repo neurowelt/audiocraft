@@ -84,25 +84,6 @@ For the general framework of AudioCraft, please cite the following.
 When referring to a specific model, please cite as mentioned in the model specific README, e.g
 [./docs/MUSICGEN.md](./docs/MUSICGEN.md), [./docs/AUDIOGEN.md](./docs/AUDIOGEN.md), etc.
 
-## Changelog
-
-List of changes made in this fork:
-
-* Allow writing to buffer using `audio_write`:
-
-  ```python
-  from audiocraft.data.audio import audio_write
-  from io import BytesIO
-
-  buffer = BytesIO()
-  audio_write(buffer, wav, sample_rate)
-
-  with open("output.wav", "wb") as f:
-      f.write(buffer.read())
-  ```
-
-* Set `max_duration` when loading model from `get_pretrained`:
-
 [arxiv]: https://arxiv.org/abs/2306.05284
 [musicgen_samples]: https://ai.honu.io/papers/musicgen/
 
